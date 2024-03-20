@@ -165,7 +165,6 @@
       let addBtn = document.getElementById("addBtn");
       // todoList ul
       let todoList = document.getElementById("todoList");
-
       let todo_del_btn = document.getElementById("delBtn");
 
       // keydown 이벤트
@@ -176,13 +175,22 @@
       });
 
       // addBtn 클릭 이벤트
-      function add() {
+      function add(storageData) {
         // todo_Item 생성
         let todo_Item = document.createElement("li");
         // 체크박스 디자인 버튼 생성
         let todo_Item_btn = document.createElement("button");
         let todo_Item_p = document.createElement("p");
         let todoInputValue = document.createTextNode(todoInput.value);
+
+        // storage에 data가 있다면
+        if (storageData) {
+          todoInputValue = storageData.contents;
+        }
+        // storage에 data가 있고 data안에 on이 true라면
+        if (storageData && storageData.on === true) {
+          todo_Item_btn.classList.add("on");
+        }
 
         if (todoInputValue.length > 0) {
           // btn
@@ -207,10 +215,16 @@
           if (todo_Item_list.length == 0) {
             todo_del_btn.style.display = "none";
           }
+          saveItems();
         });
         // 완료 상태 체크 클릭 이벤트
         todo_Item.addEventListener("click", function () {
           todo_Item_btn.classList.toggle("on");
+          saveItems();
+        });
+
+        todo_Item_btn.addEventListener("click", function () {
+          saveItems();
         });
       }
 
@@ -226,6 +240,43 @@
       function todo_Item_alldel() {
         todoList.innerHTML = "";
       }
+
+      function saveItems() {
+        // 로컬에 데이터 저장하기
+        let todoList = document.getElementById("todoList");
+
+        const save_todo_Items = []; // 빈 배열 할당
+        for (let i = 0; i < todoList.children.length; i++) {
+          const todoObj = {
+            contents: todoList.children[i].querySelector("p").textContent, // 리스트 목록
+            on: todoList.children[i]
+              .querySelector("button")
+              .classList.contains("on"),
+            // 완료 표시된 리스트
+          };
+          save_todo_Items.push(todoObj); // 배열 추가
+        }
+        // localstorage에 json으로 배열 담기
+        if (save_todo_Items.length === 0) {
+          localStorage.removeItem("save_todo_Items");
+        } else {
+          localStorage.setItem(
+            "save_todo_Items",
+            JSON.stringify(save_todo_Items)
+          );
+        }
+      }
+      // localstorage에 json으로 배열 가져오기
+      const getItems = JSON.parse(localStorage.getItem("save_todo_Items"));
+
+      if (getItems) {
+        // savedTodoList(로컬 데이터)가 존재하면 실행
+        for (let i = 0; i < getItems.length; i++) {
+          add(getItems[i]); // 전달인자로 전달
+        }
+      }
+
+      saveItems();
     </script>
   </body>
 </html>
