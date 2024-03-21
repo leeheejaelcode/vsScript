@@ -14,7 +14,6 @@
       }
       .result {
         margin: 0;
-        height: 20px;
         text-align: right;
       }
       .calc {
@@ -62,13 +61,13 @@
       </div>
       <div class="buttons">
         <button data-type="ac" id="reset">C</button>
-        <button data-type="operator" class="operator" id="plus">+</button>
-        <button data-type="operator" class="operator" id="minus">-</button>
+        <button data-type="operator" class="operator" id="divide">÷</button>
         <button data-type="operator" class="operator" id="multiply">x</button>
+        <button data-type="operator" class="operator" id="plus">+</button>
         <button class="numBtn">7</button>
         <button class="numBtn">8</button>
         <button class="numBtn">9</button>
-        <button data-type="operator" class="operator" id="divide">/</button>
+        <button data-type="operator" class="operator" id="minus">-</button>
         <button class="numBtn">4</button>
         <button class="numBtn">5</button>
         <button class="numBtn">6</button>
@@ -81,7 +80,7 @@
     </div>
 
     <script>
-      const result = document.querySelector(".result"); //
+      const result = document.querySelector(".result"); // 클릭된 버튼의 내용이 담길 p
       const buttons = document.querySelectorAll("button"); // button들
       const operators = document.querySelectorAll(".operator"); // 연산자들
       const numBtn = document.querySelectorAll(".numBtn"); // 숫자버튼들
@@ -95,8 +94,60 @@
       });
 
       function calculator(e) {
-        let val = e.target.innerHTML;
-        if (val !== 0 && Number(val)) {
+        // 클릭된 버튼의 내용
+        let val = e.target.innerText;
+        // 만약 클릭된 버튼이 숫자이면
+        if (val >= 0 && val <= 9) {
+          // 연산자가 없는 경우 prevNum에 추가.
+          if (operator == "") {
+            prevNum += val;
+            result.innerHTML = prevNum;
+          } else {
+            // 연산자가 있는 경우 nextNum에 추가.
+            nextNum += val;
+            result.innerHTML = nextNum;
+          }
+        }
+        // 클릭된 버튼이 숫자가 아니면서, "C"나 "="이 아닌 경우,
+        else if (val !== "C" && val !== "=") {
+          // 연산자를 operator 변수에 할당
+          operator = val;
+        }
+        // 클릭된 버튼이 "C"인 경우,
+        if (val === "C") {
+          // 모든 변수들을 초기화, 결과를 0으로 설정하여 초기 상태로 돌아감.
+          prevNum = "";
+          operator = "";
+          nextNum = "";
+          result.innerHTML = 0;
+        }
+
+        // 클릭된 버튼이 "="인 경우,
+        if (val === "=") {
+          // 연산자에 따라 이전 숫자(prevNum)와 다음 숫자(nextNum)를 사용하여 연산을 수행합니다.
+          if (operator == "+") {
+            result.innerHTML = parseInt(prevNum) + parseInt(nextNum);
+          } else if (operator == "-") {
+            result.innerHTML = parseInt(prevNum) - parseInt(nextNum);
+          } else if (operator == "x") {
+            result.innerHTML = parseInt(prevNum) * parseInt(nextNum);
+          } else if (operator == "÷") {
+            result.innerHTML = parseInt(prevNum) / parseInt(nextNum);
+          }
+          prevNum = "";
+          operator = "";
+          nextNum = "";
+        }
+      }
+
+      // keypress 이벤트
+      document.addEventListener("keypress", keycalculator);
+
+      function keycalculator(e) {
+        // 클릭된 버튼의 key값
+        let val = e.key;
+
+        if (val >= 0 && val <= 9) {
           if (operator == "") {
             prevNum += val;
             result.innerHTML = prevNum;
@@ -104,27 +155,29 @@
             nextNum += val;
             result.innerHTML = nextNum;
           }
-        } else if (isNaN(val) && val !== "C" && val !== "=") {
+        } else if (val !== "." && val !== "Enter") {
           operator = val;
-        } else if (val === "=") {
+        } else if (val === "Enter") {
           if (operator == "+") {
             result.innerHTML = parseInt(prevNum) + parseInt(nextNum);
           } else if (operator == "-") {
             result.innerHTML = parseInt(prevNum) - parseInt(nextNum);
-          } else if (operator == "x") {
+          } else if (operator == "*") {
             result.innerHTML = parseInt(prevNum) * parseInt(nextNum);
           } else if (operator == "/") {
             result.innerHTML = parseInt(prevNum) / parseInt(nextNum);
           }
-        } else if (val === "C") {
+          prevNum = "";
+          operator = "";
+          nextNum = "";
+        }
+        if (val === ".") {
           prevNum = "";
           operator = "";
           nextNum = "";
           result.innerHTML = 0;
         }
       }
-
-      document.addEventListener("keydown", calculator);
     </script>
   </body>
 </html>
