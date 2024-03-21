@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .calc-container {
+        margin: 100px auto;
+        width: 300px;
+        height: 400px;
+        border: 1px solid transparent;
+        background-color: rgb(151, 151, 151);
+        border-radius: 5px;
+      }
+      .result {
+        margin: 0;
+        height: 20px;
+        text-align: right;
+      }
+      .calc {
+        display: flex;
+        flex-direction: column;
+        height: 50px;
+        font-size: 36px;
+        font-weight: 700;
+        border: 1px solid #777676;
+        margin: 5px 5px 0 5px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #777676;
+        color: #fff;
+      }
+      .buttons {
+        padding: 5px;
+        display: grid;
+        height: calc(100% - 85px);
+        gap: 5px;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      button {
+        color: #fff;
+        font-size: 36px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .numBtn {
+        background-color: #828284;
+      }
+      .operator,
+      #result-operator,
+      #reset {
+        background-color: orange;
+      }
+    </style>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="calc-container">
+      <div class="calc">
+        <p class="result">0</p>
+      </div>
+      <div class="buttons">
+        <button data-type="ac" id="reset">C</button>
+        <button data-type="operator" class="operator" id="plus">+</button>
+        <button data-type="operator" class="operator" id="minus">-</button>
+        <button data-type="operator" class="operator" id="multiply">x</button>
+        <button class="numBtn">7</button>
+        <button class="numBtn">8</button>
+        <button class="numBtn">9</button>
+        <button data-type="operator" class="operator" id="divide">/</button>
+        <button class="numBtn">4</button>
+        <button class="numBtn">5</button>
+        <button class="numBtn">6</button>
+        <button data-type="result" id="result-operator">=</button>
+        <button class="numBtn">1</button>
+        <button class="numBtn">2</button>
+        <button class="numBtn">3</button>
+        <button class="numBtn">0</button>
+      </div>
+    </div>
+
+    <script>
+      const result = document.querySelector(".result"); //
+      const buttons = document.querySelectorAll("button"); // button들
+      const operators = document.querySelectorAll(".operator"); // 연산자들
+      const numBtn = document.querySelectorAll(".numBtn"); // 숫자버튼들
+
+      let operator = "";
+      let prevNum = "";
+      let nextNum = "";
+
+      buttons.forEach((item) => {
+        item.addEventListener("click", calculator);
+      });
+
+      function calculator(e) {
+        let val = e.target.innerHTML;
+        if (val !== 0 && Number(val)) {
+          if (operator == "") {
+            prevNum += val;
+            result.innerHTML = prevNum;
+          } else {
+            nextNum += val;
+            result.innerHTML = nextNum;
+          }
+        } else if (isNaN(val) && val !== "C" && val !== "=") {
+          operator = val;
+        } else if (val === "=") {
+          if (operator == "+") {
+            result.innerHTML = parseInt(prevNum) + parseInt(nextNum);
+          } else if (operator == "-") {
+            result.innerHTML = parseInt(prevNum) - parseInt(nextNum);
+          } else if (operator == "x") {
+            result.innerHTML = parseInt(prevNum) * parseInt(nextNum);
+          } else if (operator == "/") {
+            result.innerHTML = parseInt(prevNum) / parseInt(nextNum);
+          }
+        } else if (val === "C") {
+          prevNum = "";
+          operator = "";
+          nextNum = "";
+          result.innerHTML = 0;
+        }
+      }
+
+      document.addEventListener("keydown", calculator);
+    </script>
+  </body>
+</html>
