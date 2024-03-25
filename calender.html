@@ -40,6 +40,7 @@
         width: 100%;
         height: 100%;
         display: grid;
+        position: relative;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
       }
 
@@ -55,21 +56,27 @@
         border-bottom: 1px solid #000;
       }
 
-      #sat {
+      #sat,
+      .sat {
         color: rgb(34, 90, 195);
       }
 
-      #sun {
+      #sun,
+      .sun {
         color: rgb(217, 36, 36);
       }
 
-      .day {
+      .day,
+      .empty {
         padding: 10px;
         border-bottom: 1px solid #000;
+        cursor: pointer;
+        position: relative;
       }
 
       .btn-container {
         position: absolute;
+        z-index: -1;
         top: 250px;
         left: 50%;
         transform: translateX(-50%);
@@ -99,14 +106,56 @@
         background-color: #000;
       }
 
-      .prev::before,
-      .next::after {
+      #prev::before,
+      #next::after {
         transform: rotate(45deg);
       }
-      .prev::after,
-      .next::before {
+      #prev::after,
+      #next::before {
         transform: rotate(-45deg);
       }
+
+      .memo {
+        border: 1px solid red;
+        width: 300px;
+        background-color: #fff;
+        color: #000;
+        display: none;
+      }
+
+      .memo.show {
+        display: block;
+      }
+
+      .day.selected::before {
+        content: "";
+        display: block;
+        position: absolute;
+        z-index: -1;
+        width: 40px;
+        height: 40px;
+        background-color: rgb(255, 195, 42);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+      }
+
+      .day.selected {
+        color: #fff;
+      }
+
+      /* .day.selected::after {
+        content: "";
+        display: block;
+        position: absolute;
+        background-color: #000;
+        width: 4px;
+        height: 4px;
+        left: 50%;
+        transform: translateX(-30%);
+        border-radius: 50%;
+      } */
     </style>
     <title>Calender</title>
   </head>
@@ -127,8 +176,8 @@
       </ul>
     </main>
     <div class="btn-container">
-      <button class="prev">이전</button>
-      <button class="next">다음</button>
+      <button id="prev">이전</button>
+      <button id="next">다음</button>
     </div>
 
     <script>
@@ -158,41 +207,36 @@
       ).getDate();
 
       // 이전 달
-      document
-        .querySelectorAll("button")[0]
-        .addEventListener("click", function () {
-          // 현재 date 객체를 이전 달로 설정
-          date.setMonth(date.getMonth() - 1);
-          // 캘린더 내용을 다시 설정
-          setCalendar();
-        });
+      document.getElementById("prev").addEventListener("click", function () {
+        // 현재 date 객체를 이전 달로 설정
+        date.setMonth(date.getMonth() - 1);
+        // 캘린더 내용을 다시 설정
+        setCalendar();
+      });
 
       // 다음 달
-      document
-        .querySelectorAll("button")[1]
-        .addEventListener("click", function () {
-          // 현재 date 객체를 다음 달로 설정
-          date.setMonth(date.getMonth() + 1);
-          // 캘린더 내용을 다시 설정
-          setCalendar();
-        });
+      document.getElementById("next").addEventListener("click", function () {
+        // 현재 date 객체를 다음 달로 설정
+        date.setMonth(date.getMonth() + 1);
+        // 캘린더 내용을 다시 설정
+        setCalendar();
+      });
 
+      // 이번 달을 가져와서 이번 달에 해당하는 오늘만 표시하기 위해
       let TodayMonth = date.getMonth();
 
       function setCalendar() {
-        // ul
-        let calender_container =
+        let calender_container = // ul
           document.getElementsByClassName("calender-container")[0];
 
         document.querySelectorAll(".day").forEach((item) => {
           item.remove();
         });
         // 날짜 및 달의 정보 다시 설정
-        let TodayMonthIndex = date.getMonth();
+        let monthIndex = date.getMonth();
 
         // h2 요소에 이번 달 표시
-        document.getElementsByTagName("h2")[0].innerHTML =
-          month[TodayMonthIndex];
+        document.getElementsByTagName("h2")[0].innerHTML = month[monthIndex];
 
         // 이전 달의 시작 요일 인덱스를 가져옴
         const startDayIndex = () => {
@@ -203,7 +247,7 @@
         // 이전 달의 시작 요일까지 빈 요소를 추가
         for (let i = 0; i < startDayIndex(); i++) {
           let li = document.createElement("li");
-          li.className = "day";
+          li.className = "empty";
           li.append("");
           calender_container.append(li);
         }
@@ -215,17 +259,50 @@
           li.append(i + 1);
           calender_container.append(li);
 
+          let memo = document.createElement("p");
+          memo.className = "memo";
+          memo.append("메모창");
+          li.append(memo);
+
           // 토요일
           if ((i + startDayIndex() + 1) % 7 === 0) {
-            li.style.color = "rgb(34, 90, 195)";
+            li.classList.add("sat");
           }
           // 일요일
           if ((i + startDayIndex() + 1) % 7 === 1) {
-            li.style.color = "rgb(217, 36, 36)";
+            li.classList.add("sun");
           }
           if (i + 1 === today && date.getMonth() === TodayMonth) {
             li.style.color = "#989898";
           }
+
+          let days = document.getElementsByClassName("day");
+
+          days[i].addEventListener("click", function (e) {
+            if (e.target.classList.contains("selected")) {
+              e.target.classList.remove("selected");
+            } else {
+              // 모든 요소에서 "selected" 클래스를 제거합니다.
+              for (let j = 0; j < days.length; j++) {
+                days[j].classList.remove("selected");
+              }
+              // 클릭된 요소에 "selected" 클래스를 추가합니다.
+              e.target.classList.add("selected");
+            }
+
+            let memos = document.getElementsByClassName("memo");
+
+            if (memos[i].classList.contains("show")) {
+              memos[i].classList.remove("show");
+            } else {
+              // 모든 요소에서 "selected" 클래스를 제거합니다.
+              for (let j = 0; j < memos.length; j++) {
+                memos[j].classList.remove("show");
+              }
+              // 클릭된 요소에 "selected" 클래스를 추가합니다.
+              memos[i].classList.add("show");
+            }
+          });
         }
       }
 
