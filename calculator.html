@@ -101,11 +101,11 @@
           // 연산자가 없는 경우 prevNum에 추가.
           if (operator == "") {
             prevNum += val;
-            result.innerHTML = prevNum;
+            result.innerText = prevNum;
           } else {
             // 연산자가 있는 경우 nextNum에 추가.
             nextNum += val;
-            result.innerHTML = nextNum;
+            result.innerText = nextNum;
           }
         }
         // 클릭된 버튼이 숫자가 아니면서, "C"나 "="이 아닌 경우,
@@ -119,20 +119,20 @@
           prevNum = "";
           operator = "";
           nextNum = "";
-          result.innerHTML = 0;
+          result.innerText = 0;
         }
 
         // 클릭된 버튼이 "="인 경우,
         if (val === "=") {
           // 연산자에 따라 이전 숫자(prevNum)와 다음 숫자(nextNum)를 사용하여 연산을 수행합니다.
           if (operator == "+") {
-            result.innerHTML = parseInt(prevNum) + parseInt(nextNum);
+            result.innerText = parseInt(prevNum) + parseInt(nextNum);
           } else if (operator == "-") {
-            result.innerHTML = parseInt(prevNum) - parseInt(nextNum);
+            result.innerText = parseInt(prevNum) - parseInt(nextNum);
           } else if (operator == "x") {
-            result.innerHTML = parseInt(prevNum) * parseInt(nextNum);
+            result.innerText = parseInt(prevNum) * parseInt(nextNum);
           } else if (operator == "÷") {
-            result.innerHTML = parseInt(prevNum) / parseInt(nextNum);
+            result.innerText = parseInt(prevNum) / parseInt(nextNum);
           }
           prevNum = "";
           operator = "";
@@ -150,22 +150,22 @@
         if (val >= 0 && val <= 9) {
           if (operator == "") {
             prevNum += val;
-            result.innerHTML = prevNum;
+            result.innerText = prevNum;
           } else {
             nextNum += val;
-            result.innerHTML = nextNum;
+            result.innerText = nextNum;
           }
         } else if (val !== "." && val !== "Enter") {
           operator = val;
         } else if (val === "Enter") {
           if (operator == "+") {
-            result.innerHTML = parseInt(prevNum) + parseInt(nextNum);
+            result.innerText = parseInt(prevNum) + parseInt(nextNum);
           } else if (operator == "-") {
-            result.innerHTML = parseInt(prevNum) - parseInt(nextNum);
+            result.innerText = parseInt(prevNum) - parseInt(nextNum);
           } else if (operator == "*") {
-            result.innerHTML = parseInt(prevNum) * parseInt(nextNum);
+            result.innerText = parseInt(prevNum) * parseInt(nextNum);
           } else if (operator == "/") {
-            result.innerHTML = parseInt(prevNum) / parseInt(nextNum);
+            result.innerText = parseInt(prevNum) / parseInt(nextNum);
           }
           prevNum = "";
           operator = "";
@@ -175,7 +175,7 @@
           prevNum = "";
           operator = "";
           nextNum = "";
-          result.innerHTML = 0;
+          result.innerText = 0;
         }
       }
     </script>

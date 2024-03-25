@@ -169,7 +169,7 @@
 
       // keydown 이벤트
       document.addEventListener("keydown", function (e) {
-        if (e.keyCode == 13) {
+        if (e.key == "Enter") {
           add();
         }
       });
@@ -229,7 +229,7 @@
       }
 
       function deleteAll() {
-        // 전체 삭제 버튼
+        //  삭제 버튼
         let todo_Item_list = document.querySelectorAll("#todoList li");
         for (let i = 0; i < todo_Item_list.length; i++) {
           todo_Item_list[i].remove();
@@ -237,9 +237,6 @@
         // 전체삭제 버튼 안보이게
         todo_del_btn.style.display = "none";
         saveItems();
-      }
-      function todo_Item_alldel() {
-        todoList.innerHTML = "";
       }
 
       function saveItems() {

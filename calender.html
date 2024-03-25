@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        list-style: none;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      h1 {
+        color: rgb(217, 36, 36);
+        text-transform: uppercase;
+        font-size: 40px;
+        letter-spacing: 1.5px;
+        padding-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 35px;
+      }
+
+      main {
+        width: 500px;
+        margin: 50px auto;
+        border: 1px solid;
+        padding: 20px 30px 30px;
+      }
+
+      .calender-container {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      }
+
+      .week,
+      .day {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        padding: 5px;
+      }
+
+      .week {
+        border-bottom: 1px solid #000;
+      }
+
+      #sat {
+        color: rgb(34, 90, 195);
+      }
+
+      #sun {
+        color: rgb(217, 36, 36);
+      }
+
+      .day {
+        padding: 10px;
+        border-bottom: 1px solid #000;
+      }
+
+      .btn-container {
+        position: absolute;
+        top: 250px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .btn-container button {
+        border: none;
+        background: transparent;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        position: relative;
+        text-indent: -9999px;
+      }
+
+      .btn-container button::before,
+      .btn-container button::after {
+        content: "";
+        display: block;
+        width: 3px;
+        height: 28px;
+        left: 50%;
+        position: absolute;
+        background-color: #000;
+      }
+
+      .prev::before,
+      .next::after {
+        transform: rotate(45deg);
+      }
+      .prev::after,
+      .next::before {
+        transform: rotate(-45deg);
+      }
+    </style>
+    <title>Calender</title>
+  </head>
+  <body>
+    <main>
+      <div class="header">
+        <h1>Calender</h1>
+        <h2>Month</h2>
+      </div>
+      <ul class="calender-container">
+        <li class="week" id="sun">SUN</li>
+        <li class="week">MON</li>
+        <li class="week">TUE</li>
+        <li class="week">WED</li>
+        <li class="week">THU</li>
+        <li class="week">FRI</li>
+        <li class="week" id="sat">SAT</li>
+      </ul>
+    </main>
+    <div class="btn-container">
+      <button class="prev">이전</button>
+      <button class="next">다음</button>
+    </div>
+
+    <script>
+      const date = new Date();
+      const today = date.getDate(); // 오늘의 날짜 가져오기
+      const month = [
+        // 달 가져오기
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      // 각각의 달의 일수 계산
+      let dayOfMonth = new Date(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        0
+      ).getDate();
+
+      // 이전 달
+      document
+        .querySelectorAll("button")[0]
+        .addEventListener("click", function () {
+          // 현재 date 객체를 이전 달로 설정
+          date.setMonth(date.getMonth() - 1);
+          // 캘린더 내용을 다시 설정
+          setCalendar();
+        });
+
+      // 다음 달
+      document
+        .querySelectorAll("button")[1]
+        .addEventListener("click", function () {
+          // 현재 date 객체를 다음 달로 설정
+          date.setMonth(date.getMonth() + 1);
+          // 캘린더 내용을 다시 설정
+          setCalendar();
+        });
+
+      let TodayMonth = date.getMonth();
+
+      function setCalendar() {
+        // ul
+        let calender_container =
+          document.getElementsByClassName("calender-container")[0];
+
+        document.querySelectorAll(".day").forEach((item) => {
+          item.remove();
+        });
+        // 날짜 및 달의 정보 다시 설정
+        let TodayMonthIndex = date.getMonth();
+
+        // h2 요소에 이번 달 표시
+        document.getElementsByTagName("h2")[0].innerHTML =
+          month[TodayMonthIndex];
+
+        // 이전 달의 시작 요일 인덱스를 가져옴
+        const startDayIndex = () => {
+          date.setDate(1); // 이번 달의 첫 번째 날 설정
+          return date.getDay();
+        };
+
+        // 이전 달의 시작 요일까지 빈 요소를 추가
+        for (let i = 0; i < startDayIndex(); i++) {
+          let li = document.createElement("li");
+          li.className = "day";
+          li.append("");
+          calender_container.append(li);
+        }
+
+        // 이번 달의 날짜를 추가
+        for (let i = 0; i < dayOfMonth; i++) {
+          let li = document.createElement("li");
+          li.className = "day";
+          li.append(i + 1);
+          calender_container.append(li);
+
+          // 토요일
+          if ((i + startDayIndex() + 1) % 7 === 0) {
+            li.style.color = "rgb(34, 90, 195)";
+          }
+          // 일요일
+          if ((i + startDayIndex() + 1) % 7 === 1) {
+            li.style.color = "rgb(217, 36, 36)";
+          }
+          if (i + 1 === today && date.getMonth() === TodayMonth) {
+            li.style.color = "#989898";
+          }
+        }
+      }
+
+      // 페이지 로드 시 캘린더 초기화
+      setCalendar();
+    </script>
+  </body>
+</html>
