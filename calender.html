@@ -66,6 +66,9 @@
         color: rgb(217, 36, 36);
       }
 
+      .today {
+        color: #989898;
+      }
       .day,
       .empty {
         padding: 10px;
@@ -76,13 +79,13 @@
 
       .btn-container {
         position: absolute;
-        z-index: -1;
         top: 250px;
         left: 50%;
         transform: translateX(-50%);
         width: 600px;
         display: flex;
         justify-content: space-between;
+        height: 0px;
       }
 
       .btn-container button {
@@ -115,16 +118,76 @@
         transform: rotate(-45deg);
       }
 
-      .memo {
-        border: 1px solid red;
-        width: 300px;
+      .memoContainer {
+        border: 1px solid rgb(0, 0, 0);
+        position: absolute;
+        z-index: 1;
+        min-height: 200px;
         background-color: #fff;
         color: #000;
         display: none;
       }
 
-      .memo.show {
+      .memoContainer.show {
         display: block;
+      }
+
+      .memoBtnInputContainer {
+        display: flex;
+        border-bottom: 1px solid;
+        padding: 10px;
+      }
+
+      .memoInput {
+        border: none;
+        outline: none;
+      }
+
+      .memoBtn {
+        width: 10px;
+        height: 15px;
+        background-color: #fff;
+        border: none;
+        position: relative;
+      }
+
+      .memoBtn::before,
+      .memoBtn::after {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 15px;
+        height: 2px;
+        background-color: #000;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .memoBtn::before {
+        transform: translate(-50%, -50%) rotate(90deg);
+      }
+
+      .memoPwrapper {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid;
+        padding: 10px;
+      }
+
+      .memoCheckBtn {
+        width: 10px;
+        height: 10px;
+        border: 1px solid;
+        border-radius: 50%;
+        background-color: #fff;
+      }
+
+      .memoP {
+        text-align: left;
+        margin-left: 10px;
+        font-size: 16px;
+        font-weight: normal;
       }
 
       .day.selected::before {
@@ -145,7 +208,7 @@
         color: #fff;
       }
 
-      /* .day.selected::after {
+      .day.active::after {
         content: "";
         display: block;
         position: absolute;
@@ -155,7 +218,7 @@
         left: 50%;
         transform: translateX(-30%);
         border-radius: 50%;
-      } */
+      }
     </style>
     <title>Calender</title>
   </head>
@@ -225,24 +288,29 @@
       // 이번 달을 가져와서 이번 달에 해당하는 오늘만 표시하기 위해
       let TodayMonth = date.getMonth();
 
+      // 이전 달의 시작 요일 인덱스를 가져옴
+      let startDayIndex = () => {
+        date.setDate(1); // 이번 달의 첫 번째 날 설정
+        return date.getDay();
+      };
+
       function setCalendar() {
         let calender_container = // ul
           document.getElementsByClassName("calender-container")[0];
 
-        document.querySelectorAll(".day").forEach((item) => {
-          item.remove();
+        document.querySelectorAll("li").forEach((item) => {
+          if (
+            item.classList.contains("day") ||
+            item.classList.contains("empty")
+          ) {
+            item.remove();
+          }
         });
         // 날짜 및 달의 정보 다시 설정
         let monthIndex = date.getMonth();
 
         // h2 요소에 이번 달 표시
         document.getElementsByTagName("h2")[0].innerHTML = month[monthIndex];
-
-        // 이전 달의 시작 요일 인덱스를 가져옴
-        const startDayIndex = () => {
-          date.setDate(1); // 이번 달의 첫 번째 날 설정
-          return date.getDay();
-        };
 
         // 이전 달의 시작 요일까지 빈 요소를 추가
         for (let i = 0; i < startDayIndex(); i++) {
@@ -259,10 +327,16 @@
           li.append(i + 1);
           calender_container.append(li);
 
-          let memo = document.createElement("p");
-          memo.className = "memo";
-          memo.append("메모창");
-          li.append(memo);
+          let CreateMemoContainer = document.createElement("div");
+          CreateMemoContainer.className = "memoContainer";
+          CreateMemoContainer.innerHTML = `
+                <div class="memoBtnInputContainer">
+                  <input class="memoInput" placeholder="메모 추가">
+                  <button class="memoBtn"></button>
+                </div>
+                <div class="memoPcontainer"></div>
+                `;
+          li.append(CreateMemoContainer);
 
           // 토요일
           if ((i + startDayIndex() + 1) % 7 === 0) {
@@ -273,37 +347,99 @@
             li.classList.add("sun");
           }
           if (i + 1 === today && date.getMonth() === TodayMonth) {
-            li.style.color = "#989898";
+            li.classList.add("today");
           }
 
-          let days = document.getElementsByClassName("day");
+          document
+            .getElementsByClassName("memoBtn")
+            [i].addEventListener("click", function () {
+              let memoInput = document.getElementsByClassName("memoInput")[i];
 
-          days[i].addEventListener("click", function (e) {
-            if (e.target.classList.contains("selected")) {
-              e.target.classList.remove("selected");
-            } else {
-              // 모든 요소에서 "selected" 클래스를 제거합니다.
-              for (let j = 0; j < days.length; j++) {
-                days[j].classList.remove("selected");
+              if (memoInput.value.trim().length !== 0) {
+                let CreateMemoPwrapper = document.createElement("div");
+                let CreateMemoCheckBtn = document.createElement("button");
+                let CreateMemoP = document.createElement("p");
+
+                CreateMemoP.className = "memoP";
+                CreateMemoCheckBtn.className = "memoCheckBtn";
+                CreateMemoPwrapper.className = "memoPwrapper";
+
+                CreateMemoPwrapper.append(CreateMemoCheckBtn);
+                CreateMemoPwrapper.append(CreateMemoP);
+                CreateMemoP.innerText = memoInput.value;
+
+                document
+                  .getElementsByClassName("memoPcontainer")
+                  [i].append(CreateMemoPwrapper);
+
+                memoInput.value = "";
               }
-              // 클릭된 요소에 "selected" 클래스를 추가합니다.
-              e.target.classList.add("selected");
-            }
 
-            let memos = document.getElementsByClassName("memo");
-
-            if (memos[i].classList.contains("show")) {
-              memos[i].classList.remove("show");
-            } else {
-              // 모든 요소에서 "selected" 클래스를 제거합니다.
-              for (let j = 0; j < memos.length; j++) {
-                memos[j].classList.remove("show");
+              let memoPcontainer =
+                document.getElementsByClassName("memoPcontainer")[i];
+              if (memoPcontainer.innerText.trim().length === 0) {
+                li.className = li.className.replace(" active", "");
+              } else {
+                if (!li.className.includes("active")) {
+                  li.className += " active";
+                }
               }
-              // 클릭된 요소에 "selected" 클래스를 추가합니다.
-              memos[i].classList.add("show");
+            });
+
+          //   days[i].addEventListener(
+          //     "click",
+          //     function (e) {
+          //       Array.from(days).forEach((item, i) => {
+          //         if (item.classList.contains("selected")) {
+          //           item.classList.remove("selected");
+          //           item.children[0].classList.remove("show");
+          //         } else {
+          //           e.currentTarget.classList.add("selected");
+          //           e.currentTarget.children[0].classList.add("show");
+          //         }
+          //       });
+          //     }
+
+          //   !days[j].classList.contains("selected")
+
+          // document.addEventListener("click", function (e) {
+          //   let memoP = document.getElementsByClassName("memoP");
+
+          //   for (let i = 0; i < memoP.length; i++) {
+          //     if (memoP[i].classList.contains("checked")) {
+          //       memoP[i].classList.remove("checked");
+          //       memoP[i].classList.add("checked");
+          //     } else {
+          //       memoP[i].classList.add("selected");
+          //     }
+          //   }
+          // });
+          //   );
+        }
+        let days = document.getElementsByClassName("day");
+
+        Array.from(days).forEach((item, i) => {
+          item.addEventListener("click", function (e) {
+            // 클릭된 요소가 실제로 날짜 요소인지 확인합니다.
+            if (e.target.classList.contains("day")) {
+              // 클릭된 요소가 이미 선택되어 있는지 확인합니다.
+              let isSelected = item.classList.contains("selected");
+
+              // 기존에 선택된 요소가 있는지 확인하고 선택 상태를 변경합니다.
+              let previouslySelected = document.querySelector(".day.selected");
+              if (previouslySelected) {
+                previouslySelected.classList.remove("selected");
+                previouslySelected.children[0].classList.remove("show");
+              }
+
+              // 현재 클릭된 요소의 선택 상태를 변경합니다.
+              if (!isSelected) {
+                item.classList.add("selected");
+                item.children[0].classList.add("show");
+              }
             }
           });
-        }
+        });
       }
 
       // 페이지 로드 시 캘린더 초기화
