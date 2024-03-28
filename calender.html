@@ -171,8 +171,10 @@
       .memoPwrapper {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         border-bottom: 1px solid;
         padding: 10px;
+        cursor: default;
       }
 
       .memoPwrapper.check .memoP {
@@ -183,39 +185,33 @@
       .memoCheckBtn {
         width: 10px;
         height: 10px;
-        border: 1px solid;
-        border-radius: 50%;
         background-color: #fff;
+        cursor: pointer;
+        border: none;
         position: relative;
       }
 
-      .memoPwrapper.check .memoCheckBtn::before,
-      .memoPwrapper.check .memoCheckBtn::after {
+      .memoCheckBtn::before,
+      .memoCheckBtn::after {
         content: "";
         display: block;
         position: absolute;
         background-color: #000;
-        height: 1px;
-        border-radius: 2px;
-      }
-
-      .memoPwrapper.check .memoCheckBtn::before {
+        top: 50%;
+        left: 50%;
         width: 10px;
-        left: 3px;
-        transform: rotate(145deg);
-        top: 3px;
+        height: 1px;
       }
 
-      .memoPwrapper.check .memoCheckBtn::after {
-        width: 5px;
-        transform: rotate(235deg);
-        top: 4px;
-        left: 0.5px;
+      .memoCheckBtn::before {
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+      .memoCheckBtn::after {
+        transform: translate(-50%, -50%) rotate(-45deg);
       }
 
       .memoP {
         text-align: left;
-        margin-left: 10px;
         font-size: 16px;
         font-weight: normal;
       }
@@ -272,7 +268,6 @@
       <button id="prev">이전</button>
       <button id="next">다음</button>
     </div>
-
     <script>
       const date = new Date();
       const today = date.getDate(); // 오늘의 날짜 가져오기
@@ -305,6 +300,7 @@
         date.setMonth(date.getMonth() - 1);
         // 캘린더 내용을 다시 설정
         setCalendar();
+        createMemo();
       });
 
       // 다음 달
@@ -313,6 +309,7 @@
         date.setMonth(date.getMonth() + 1);
         // 캘린더 내용을 다시 설정
         setCalendar();
+        createMemo();
       });
 
       // 이번 달을 가져와서 이번 달에 해당하는 오늘만 표시하기 위해
@@ -351,6 +348,7 @@
         }
 
         // 이번 달의 날짜를 추가
+        // dayOfMonth 반복문 시작
         for (let i = 0; i < dayOfMonth; i++) {
           let li = document.createElement("li");
           li.className = `day day${i + 1}`;
@@ -361,7 +359,9 @@
           CreateMemoContainer.className = "memoContainer";
           CreateMemoContainer.innerHTML = `
                 <div class="memoBtnInputContainer">
-                  <input class="memoInput" placeholder="메모 추가">
+                  <input class="memoInput" placeholder="${
+                    i + 1
+                  }일 메모" name="memoInput">
                   <button class="memoBtn"></button>
                 </div>
                 <div class="memoPcontainer"></div>
@@ -379,61 +379,32 @@
           if (i + 1 === today && date.getMonth() === TodayMonth) {
             li.classList.add("today");
           }
-
-          document
-            .getElementsByClassName("memoBtn")
-            [i].addEventListener("click", function () {
-              let memoInput = document.getElementsByClassName("memoInput")[i];
-
-              if (memoInput.value.trim().length !== 0) {
-                let CreateMemoPwrapper = document.createElement("div");
-                let CreateMemoCheckBtn = document.createElement("button");
-                let CreateMemoP = document.createElement("p");
-
-                CreateMemoP.className = "memoP";
-                CreateMemoCheckBtn.className = "memoCheckBtn";
-                CreateMemoPwrapper.className = "memoPwrapper";
-
-                CreateMemoPwrapper.append(CreateMemoCheckBtn);
-                CreateMemoPwrapper.append(CreateMemoP);
-                CreateMemoP.innerText = memoInput.value;
-
-                document
-                  .getElementsByClassName("memoPcontainer")
-                  [i].append(CreateMemoPwrapper);
-
-                memoInput.value = "";
-              }
-
-              let memoPcontainer =
-                document.getElementsByClassName("memoPcontainer")[i];
-              if (memoPcontainer.innerText.trim().length === 0) {
-                li.className = li.className.replace(" active", "");
-              } else {
-                if (!li.className.includes("active")) {
-                  li.className += " active";
-                }
-              }
-
-              let memoPwrapper =
-                document.getElementsByClassName("memoPwrapper");
-              console.log(memoPwrapper);
-
-              Array.from(memoPwrapper).forEach((item, i) => {
-                item.addEventListener("click", function (e) {
-                  item.classList.toggle("check");
-                });
-              });
-              Array.from(memoPwrapper).forEach((item, i) => {
-                item.addEventListener("dbclick", function (e) {
-                  item.classList.toggle("check");
-                });
-              });
-            });
         }
+        // dayOfMonth 반복문 끝
 
+        let memoInput = document.getElementsByClassName("memoInput");
+
+        Array.from(memoInput).forEach((item) => {
+          item.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              createMemo();
+            }
+          });
+        });
+
+        // 버튼 클릭시 메모 생성 끝
+        let memoBtn = document.getElementsByClassName("memoBtn");
+
+        Array.from(memoBtn).forEach((item) => {
+          item.addEventListener("click", function () {
+            createMemo();
+          });
+        });
+
+        // 선택된 day의 select와 자식show 클래스 제어 시작
         let days = document.getElementsByClassName("day");
-        Array.from(days).forEach((item, i) => {
+
+        Array.from(days).forEach((item) => {
           item.addEventListener("click", function (e) {
             // 클릭된 요소가 실제로 날짜 요소인지 확인합니다.
             if (e.target.classList.contains("day")) {
@@ -460,6 +431,61 @@
 
       // 페이지 로드 시 캘린더 초기화
       setCalendar();
+
+      // createMemo 함수 시작
+      function createMemo() {
+        let memoInput = document.getElementsByClassName("memoInput");
+
+        Array.from(memoInput).forEach((item, i) => {
+          if (item.value.trim().length !== 0) {
+            let CreateMemoPwrapper = document.createElement("div");
+            let CreateMemoCheckBtn = document.createElement("button");
+            let CreateMemoP = document.createElement("p");
+            CreateMemoP.className = "memoP";
+            CreateMemoCheckBtn.className = "memoCheckBtn";
+            CreateMemoPwrapper.className = "memoPwrapper";
+            CreateMemoPwrapper.append(CreateMemoP);
+            CreateMemoPwrapper.append(CreateMemoCheckBtn);
+            CreateMemoP.innerText = item.value;
+            document
+              .getElementsByClassName("memoPcontainer")
+              [i].append(CreateMemoPwrapper);
+            item.value = "";
+          }
+        });
+
+        // memoCheckBtn클릭시 삭제 시작
+        let memoCheckBtn = document.getElementsByClassName("memoCheckBtn");
+
+        Array.from(memoCheckBtn).forEach((item) => {
+          item.addEventListener("click", function (e) {
+            e.target.closest(".memoPwrapper").remove();
+            activeClass();
+          });
+        });
+
+        activeClass();
+
+        // memoCheckBtn클릭시 삭제 끝
+      }
+
+      function activeClass() {
+        let days = Array.from(document.getElementsByClassName("day"));
+        let memoPcontainer = Array.from(
+          document.getElementsByClassName("memoPcontainer")
+        );
+
+        memoPcontainer.forEach((item, i) => {
+          if (item.innerText.trim().length === 0) {
+            days[i].classList.remove("active");
+          } else {
+            days[i].classList.add("active");
+          }
+        });
+      }
+      // createMemo 함수 끝
+
+      // enter 키로 메모 생성 시작
     </script>
   </body>
 </html>
