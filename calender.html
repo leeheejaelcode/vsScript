@@ -175,12 +175,42 @@
         padding: 10px;
       }
 
+      .memoPwrapper.check .memoP {
+        text-decoration: line-through;
+        color: #929292;
+      }
+
       .memoCheckBtn {
         width: 10px;
         height: 10px;
         border: 1px solid;
         border-radius: 50%;
         background-color: #fff;
+        position: relative;
+      }
+
+      .memoPwrapper.check .memoCheckBtn::before,
+      .memoPwrapper.check .memoCheckBtn::after {
+        content: "";
+        display: block;
+        position: absolute;
+        background-color: #000;
+        height: 1px;
+        border-radius: 2px;
+      }
+
+      .memoPwrapper.check .memoCheckBtn::before {
+        width: 10px;
+        left: 3px;
+        transform: rotate(145deg);
+        top: 3px;
+      }
+
+      .memoPwrapper.check .memoCheckBtn::after {
+        width: 5px;
+        transform: rotate(235deg);
+        top: 4px;
+        left: 0.5px;
       }
 
       .memoP {
@@ -190,7 +220,7 @@
         font-weight: normal;
       }
 
-      .day.selected::before {
+      .day.select::before {
         content: "";
         display: block;
         position: absolute;
@@ -204,7 +234,7 @@
         border-radius: 50%;
       }
 
-      .day.selected {
+      .day.select {
         color: #fff;
       }
 
@@ -323,7 +353,7 @@
         // 이번 달의 날짜를 추가
         for (let i = 0; i < dayOfMonth; i++) {
           let li = document.createElement("li");
-          li.className = "day";
+          li.className = `day day${i + 1}`;
           li.append(i + 1);
           calender_container.append(li);
 
@@ -384,57 +414,43 @@
                   li.className += " active";
                 }
               }
+
+              let memoPwrapper =
+                document.getElementsByClassName("memoPwrapper");
+              console.log(memoPwrapper);
+
+              Array.from(memoPwrapper).forEach((item, i) => {
+                item.addEventListener("click", function (e) {
+                  item.classList.toggle("check");
+                });
+              });
+              Array.from(memoPwrapper).forEach((item, i) => {
+                item.addEventListener("dbclick", function (e) {
+                  item.classList.toggle("check");
+                });
+              });
             });
-
-          //   days[i].addEventListener(
-          //     "click",
-          //     function (e) {
-          //       Array.from(days).forEach((item, i) => {
-          //         if (item.classList.contains("selected")) {
-          //           item.classList.remove("selected");
-          //           item.children[0].classList.remove("show");
-          //         } else {
-          //           e.currentTarget.classList.add("selected");
-          //           e.currentTarget.children[0].classList.add("show");
-          //         }
-          //       });
-          //     }
-
-          //   !days[j].classList.contains("selected")
-
-          // document.addEventListener("click", function (e) {
-          //   let memoP = document.getElementsByClassName("memoP");
-
-          //   for (let i = 0; i < memoP.length; i++) {
-          //     if (memoP[i].classList.contains("checked")) {
-          //       memoP[i].classList.remove("checked");
-          //       memoP[i].classList.add("checked");
-          //     } else {
-          //       memoP[i].classList.add("selected");
-          //     }
-          //   }
-          // });
-          //   );
         }
-        let days = document.getElementsByClassName("day");
 
+        let days = document.getElementsByClassName("day");
         Array.from(days).forEach((item, i) => {
           item.addEventListener("click", function (e) {
             // 클릭된 요소가 실제로 날짜 요소인지 확인합니다.
             if (e.target.classList.contains("day")) {
               // 클릭된 요소가 이미 선택되어 있는지 확인합니다.
-              let isSelected = item.classList.contains("selected");
+              let select = item.classList.contains("select");
 
               // 기존에 선택된 요소가 있는지 확인하고 선택 상태를 변경합니다.
-              let previouslySelected = document.querySelector(".day.selected");
-              if (previouslySelected) {
-                previouslySelected.classList.remove("selected");
-                previouslySelected.children[0].classList.remove("show");
+              let selected = document.querySelector(".day.select");
+
+              if (selected) {
+                selected.classList.remove("select");
+                selected.children[0].classList.remove("show");
               }
 
               // 현재 클릭된 요소의 선택 상태를 변경합니다.
-              if (!isSelected) {
-                item.classList.add("selected");
+              if (!select) {
+                item.classList.add("select");
                 item.children[0].classList.add("show");
               }
             }
