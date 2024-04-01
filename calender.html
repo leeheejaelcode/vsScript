@@ -36,7 +36,7 @@
         padding: 20px 30px 30px;
       }
 
-      .calender-container {
+      #calender-container {
         width: 100%;
         height: 100%;
         display: grid;
@@ -126,6 +126,7 @@
         background-color: #fff;
         color: #000;
         display: none;
+        cursor: default;
       }
 
       .memoContainer.show {
@@ -182,7 +183,7 @@
         color: #929292;
       }
 
-      .memoCheckBtn {
+      .memoDelBtn {
         width: 10px;
         height: 10px;
         background-color: #fff;
@@ -191,8 +192,8 @@
         position: relative;
       }
 
-      .memoCheckBtn::before,
-      .memoCheckBtn::after {
+      .memoDelBtn::before,
+      .memoDelBtn::after {
         content: "";
         display: block;
         position: absolute;
@@ -203,10 +204,10 @@
         height: 1px;
       }
 
-      .memoCheckBtn::before {
+      .memoDelBtn::before {
         transform: translate(-50%, -50%) rotate(45deg);
       }
-      .memoCheckBtn::after {
+      .memoDelBtn::after {
         transform: translate(-50%, -50%) rotate(-45deg);
       }
 
@@ -254,7 +255,7 @@
         <h1>Calender</h1>
         <h2>Month</h2>
       </div>
-      <ul class="calender-container">
+      <ul id="calender-container">
         <li class="week" id="sun">SUN</li>
         <li class="week">MON</li>
         <li class="week">TUE</li>
@@ -299,8 +300,9 @@
         // 현재 date 객체를 이전 달로 설정
         date.setMonth(date.getMonth() - 1);
         // 캘린더 내용을 다시 설정
+        resetDay();
         setCalendar();
-        createMemo();
+        getMemo();
       });
 
       // 다음 달
@@ -308,8 +310,9 @@
         // 현재 date 객체를 다음 달로 설정
         date.setMonth(date.getMonth() + 1);
         // 캘린더 내용을 다시 설정
+        resetDay();
         setCalendar();
-        createMemo();
+        getMemo();
       });
 
       // 이번 달을 가져와서 이번 달에 해당하는 오늘만 표시하기 위해
@@ -322,20 +325,10 @@
       };
 
       function setCalendar() {
-        let calender_container = // ul
-          document.getElementsByClassName("calender-container")[0];
+        let calender_container = document.querySelector("#calender-container"); // ul
 
-        document.querySelectorAll("li").forEach((item) => {
-          if (
-            item.classList.contains("day") ||
-            item.classList.contains("empty")
-          ) {
-            item.remove();
-          }
-        });
         // 날짜 및 달의 정보 다시 설정
         let monthIndex = date.getMonth();
-
         // h2 요소에 이번 달 표시
         document.getElementsByTagName("h2")[0].innerHTML = month[monthIndex];
 
@@ -358,14 +351,14 @@
           let CreateMemoContainer = document.createElement("div");
           CreateMemoContainer.className = "memoContainer";
           CreateMemoContainer.innerHTML = `
-                <div class="memoBtnInputContainer">
-                  <input class="memoInput" placeholder="${
-                    i + 1
-                  }일 메모" name="memoInput">
-                  <button class="memoBtn"></button>
-                </div>
-                <div class="memoPcontainer"></div>
-                `;
+                        <div class="memoBtnInputContainer">
+                          <input class="memoInput" placeholder="${
+                            i + 1
+                          }일 메모" name="memoInput">
+                          <button class="memoBtn"></button>
+                        </div>
+                        <div class="memoPcontainer"></div>
+                        `;
           li.append(CreateMemoContainer);
 
           // 토요일
@@ -382,29 +375,28 @@
         }
         // dayOfMonth 반복문 끝
 
-        let memoInput = document.getElementsByClassName("memoInput");
-
-        Array.from(memoInput).forEach((item) => {
+        let memoInput = document.querySelectorAll(".memoInput");
+        memoInput.forEach((item) => {
           item.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && item.value.length > 0) {
               createMemo();
+              saveMemo();
             }
           });
         });
 
         // 버튼 클릭시 메모 생성 끝
-        let memoBtn = document.getElementsByClassName("memoBtn");
-
-        Array.from(memoBtn).forEach((item) => {
+        let memoBtn = document.querySelectorAll(".memoBtn");
+        memoBtn.forEach((item) => {
           item.addEventListener("click", function () {
             createMemo();
+            saveMemo();
           });
         });
 
         // 선택된 day의 select와 자식show 클래스 제어 시작
-        let days = document.getElementsByClassName("day");
-
-        Array.from(days).forEach((item) => {
+        let days = document.querySelectorAll(".day");
+        days.forEach((item) => {
           item.addEventListener("click", function (e) {
             // 클릭된 요소가 실제로 날짜 요소인지 확인합니다.
             if (e.target.classList.contains("day")) {
@@ -434,47 +426,64 @@
 
       // createMemo 함수 시작
       function createMemo() {
-        let memoInput = document.getElementsByClassName("memoInput");
+        let memoInput = document.querySelectorAll(".memoInput");
 
-        Array.from(memoInput).forEach((item, i) => {
+        memoInput.forEach((item, i) => {
           if (item.value.trim().length !== 0) {
             let CreateMemoPwrapper = document.createElement("div");
-            let CreateMemoCheckBtn = document.createElement("button");
+            let CreatememoDelBtn = document.createElement("button");
             let CreateMemoP = document.createElement("p");
             CreateMemoP.className = "memoP";
-            CreateMemoCheckBtn.className = "memoCheckBtn";
+            CreatememoDelBtn.className = "memoDelBtn";
             CreateMemoPwrapper.className = "memoPwrapper";
             CreateMemoPwrapper.append(CreateMemoP);
-            CreateMemoPwrapper.append(CreateMemoCheckBtn);
+            CreateMemoPwrapper.append(CreatememoDelBtn);
             CreateMemoP.innerText = item.value;
             document
-              .getElementsByClassName("memoPcontainer")
+              .querySelectorAll(".memoPcontainer")
               [i].append(CreateMemoPwrapper);
             item.value = "";
           }
         });
-
-        // memoCheckBtn클릭시 삭제 시작
-        let memoCheckBtn = document.getElementsByClassName("memoCheckBtn");
-
-        Array.from(memoCheckBtn).forEach((item) => {
-          item.addEventListener("click", function (e) {
-            e.target.closest(".memoPwrapper").remove();
-            activeClass();
-          });
-        });
-
         activeClass();
-
-        // memoCheckBtn클릭시 삭제 끝
+        DelMemo();
       }
 
-      function activeClass() {
-        let days = Array.from(document.getElementsByClassName("day"));
-        let memoPcontainer = Array.from(
-          document.getElementsByClassName("memoPcontainer")
-        );
+      // memoDelBtn클릭시 삭제 시작
+      function DelMemo() {
+        let memoDelBtn = document.querySelectorAll(".memoDelBtn");
 
+        memoDelBtn.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            let memoPwrapperElement = e.target.closest(".memoPwrapper");
+            memoPwrapperElement.remove();
+            activeClass();
+            let monthText = document.querySelector("h2").innerText;
+            let getContext = JSON.parse(localStorage.getItem("context"));
+            // localStorage에서 데이터 다시 가져오기
+
+            // 찾은 월에 해당하는 데이터 업데이트
+            for (let [key, value] of Object.entries(getContext)) {
+              if (key === monthText) {
+                // 클릭한 메모의 index와 memo 내용 가져오기
+                let clickedMemo =
+                  memoPwrapperElement.querySelector(".memoP").innerText;
+
+                // 해당 월의 데이터에서 클릭한 메모에 해당하는 요소 제거
+                getContext[key] = value.filter((item) => {
+                  return !(item.memos === clickedMemo);
+                });
+              }
+            }
+            localStorage.setItem("context", JSON.stringify(getContext));
+          });
+        });
+      }
+      // memoDelBtn클릭시 삭제 끝
+
+      function activeClass() {
+        let days = document.querySelectorAll(".day");
+        let memoPcontainer = document.querySelectorAll(".memoPcontainer");
         memoPcontainer.forEach((item, i) => {
           if (item.innerText.trim().length === 0) {
             days[i].classList.remove("active");
@@ -483,9 +492,113 @@
           }
         });
       }
-      // createMemo 함수 끝
 
-      // enter 키로 메모 생성 시작
+      // createMemo 함수 끝
+      function resetDay() {
+        let liList = document.querySelectorAll("li");
+        liList.forEach((item) => {
+          if (!item.classList.contains("week")) {
+            item.remove();
+          }
+        });
+      }
+
+      let context = {
+        Jan: [],
+        Feb: [],
+        Mar: [],
+        Apr: [],
+        May: [],
+        Jun: [],
+        Jul: [],
+        Aug: [],
+        Sep: [],
+        Oct: [],
+        Nov: [],
+        Dec: [],
+      };
+
+      function saveMemo() {
+        let monthText = document.querySelector("h2").innerText;
+
+        // context 객체의 각 키와 값을 반복합니다.
+        for (const key of Object.keys(context)) {
+          // 만약 h2 요소의 텍스트와 키가 일치한다면
+          if (key === monthText) {
+            // 해당 키의 memos 배열에 memoPwrapper 요소를 추가합니다.
+            let actives = document.querySelectorAll(".active");
+            let dayClickIndex = ""; // 모든 요일의 인덱스를 저장할 배열
+            actives.forEach((item) => {
+              dayClickIndex = item.className.replace(/\D/g, "");
+            });
+            let lastMemoPwrapper = document
+              .querySelectorAll(".memoPwrapper")
+              [
+                document.querySelectorAll(".memoPwrapper").length - 1
+              ].querySelector(".memoP").innerText;
+            const memoData = {
+              memos: lastMemoPwrapper,
+              index: dayClickIndex, // 모든 요일의 인덱스 배열을 저장
+            };
+            context[key].push(memoData);
+          }
+        }
+
+        if (Object.keys(context).length === 0) {
+          localStorage.removeItem("context");
+        } else {
+          localStorage.setItem("context", JSON.stringify(context));
+        }
+      }
+
+      function getMemo() {
+        let monthText = document.querySelector("h2").innerText;
+        let getContext = JSON.parse(localStorage.getItem("context")); // localStorage에서 데이터 다시 가져오기
+        if (getContext) {
+          for (const key of Object.keys(getContext)) {
+            if (Object.hasOwnProperty.call(getContext, key)) {
+              // 만약 h2 요소의 텍스트와 키가 일치한다면
+              if (key === monthText) {
+                let saveIndex = [];
+                for (const item of getContext[key]) {
+                  let saveMemo = item.memos; // 반복마다 새로운 saveMemo 생성
+                  saveIndex.push(item.index); // 각 memo의 index 값을 배열에 추가
+
+                  let index = item.index;
+                  let days = document.querySelector(`.day${index}`);
+                  if (days) {
+                    days.classList.add("active");
+                    let CreateMemoPwrapper = document.createElement("div");
+                    let CreatememoDelBtn = document.createElement("button");
+                    let CreateMemoP = document.createElement("p");
+                    CreateMemoP.className = "memoP";
+                    CreatememoDelBtn.className = "memoDelBtn";
+                    CreateMemoPwrapper.className = "memoPwrapper";
+                    CreateMemoPwrapper.append(CreateMemoP);
+                    CreateMemoPwrapper.append(CreatememoDelBtn);
+                    CreateMemoP.innerText = saveMemo;
+                    document
+                      .querySelectorAll(".memoPcontainer")
+                      [index - 1].append(CreateMemoPwrapper);
+                  }
+                }
+
+                let index = [];
+                document.querySelectorAll(".day").forEach((item, i) => {
+                  index.push(item.className.replace(/\D/g, "")); // 각 day의 index 값을 배열에 추가
+                });
+
+                // memoDelBtn클릭시 삭제 시작
+                let memoDelBtn = document.querySelectorAll(".memoDelBtn");
+                DelMemo();
+                // memoDelBtn클릭시 삭제 끝
+              }
+            }
+          }
+        }
+      }
+      getMemo();
+      DelMemo();
     </script>
   </body>
 </html>
